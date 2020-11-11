@@ -5,6 +5,7 @@ require 'pry'
 class Planet
     attr_reader :rot_time, :rev_time, :moons, :mass
     attr_accessor :name, :radius, :atmosphere, :age
+    @@all = [] 
 
     def initialize(hash)
         #Since the initialize is an instance method, inside of it self refers to the instance just created
@@ -18,16 +19,21 @@ class Planet
         @moons = hash[:moons] #Cannot use the writer cause we did not create it (see line 6)
         self.radius = hash[:radius]
         self.atmosphere = hash[:atm]
+        save
+    end
+
+    def self.all
+        @@all
+    end
+
+    def save
+        self.class.all << self
     end
     
-    def instance_method_example
-        #Since this is an instance method, the following line will print out the receiver we invoked the method on
-        puts self
-    end
-   
-    def self.class_method_example #class methods start with self.
-        #Since this is a class method, the following line will print out the class itself: Planet
-        puts self
+    def self.planets_with_atmosphere_and_rot_time_over_50_and_sorted_by_name
+        self.all.select do |planet|
+            planet.atmosphere && planet.rot_time > 50
+        end.sort_by(&:name)
     end
 
     puts self #Outside of any methods but inside a class, self refers to the class itself!
@@ -36,14 +42,16 @@ class Planet
 end
 
 #Now, when instantiating we can pass the information as a hash (notice that atm will not be provided and therefore be nil)
-earth = Planet.new({name: "Earth", mass: 5.97, rot_time: 24, rev_time: 365, moons: 1, radius: 6378.1})
+earth = Planet.new({name: "Earth", mass: 5.97, rot_time: 24, rev_time: 365, moons: 1, radius: 6378.1, atm: false})
+earth_2 = Planet.new({name: "Earth 2", mass: 5.77, rot_time: 56, rev_time: 365, moons: 1, radius: 6378.1, atm: true})
+earth_3 = Planet.new({name: "New Earth 3", mass: 5.77, rot_time: 59, rev_time: 365, moons: 1, radius: 6378.1, atm: true})
 # => #<Planet:0x00007fa30b116358 @age=0, @atmosphere=nil, @mass=5.97, @moons=1, @name="Earth", @radius=6378.1, @rev_time=365, @rot_time=24>
 
 puts "-------"
-earth.instance_method_example #the receiver of the method is the instance earth, so that's what self is inside the method instance_method_example
+# earth.instance_method_example #the receiver of the method is the instance earth, so that's what self is inside the method instance_method_example
 #<Planet:0x00007ff91ba71838>
 puts "-------"
-Planet.class_method_example #the receiver of the method is the class, so that's what self is inside the method class_method_example
+# Planet.class_method_example #the receiver of the method is the class, so that's what self is inside the method class_method_example
 # Planet
 
 binding.pry
